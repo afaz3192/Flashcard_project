@@ -1,0 +1,96 @@
+import tkinter
+from tkinter import *
+import pandas
+import random
+BACKGROUND_COLOR = "#B1DDC6"
+current_card = {}
+
+def generate_english_word():
+    canvas.itemconfig(card_title, text = "English", fill = "white")
+    canvas.itemconfig(card_word, text = current_card["English"], fill = "white")
+    canvas.itemconfig(background_image, image = card_back)
+
+
+
+
+#  window setup
+window = Tk()
+window.title("Flashy")
+flip_timer = window.after(3000, func = generate_english_word)
+window.configure(padx = 50, pady = 50, bg = BACKGROUND_COLOR)
+# front card setup
+front_card = PhotoImage(file = "card_front.png")
+
+card_back = PhotoImage(file = "card_back.png")
+
+
+canvas = Canvas(height = 526, width = 800)
+background_image = canvas.create_image(400, 263, image = front_card)
+
+canvas.config(bg = BACKGROUND_COLOR, highlightthickness = 0)
+canvas.grid(column = 0, row = 0, columnspan = 2)
+card_title = canvas.create_text(400, 150, text = "Title", font = ("Ariel", 35, "italic"))
+card_word = canvas.create_text(400, 263, text = "word", font = ("Ariel", 25, "bold"))
+
+
+
+file = pandas.read_csv("french_words.csv")
+
+
+a = pandas.Series(file['French'])
+french_words_in_list = a.to_list()
+
+
+
+
+
+french_dict = file.to_dict(orient = "records")
+
+def generate_french_word():
+    global current_card, flip_timer
+    window.after_cancel(flip_timer)
+    current_card = random.choice(french_dict)
+
+
+    canvas.itemconfig(card_title, text = "French", fill = "black")
+    canvas.itemconfig(card_word, text = current_card["French"], fill = "black")
+    canvas.itemconfig(background_image, image = front_card)
+    flip_timer = window.after(3000, func = generate_english_word)
+
+def generate_french_word_1():
+    global current_card, flip_timer
+    window.after_cancel(flip_timer)
+    current_card = random.choice(french_dict)
+
+
+    canvas.itemconfig(card_title, text = "French", fill = "black")
+    canvas.itemconfig(card_word, text = current_card["French"], fill = "black")
+    canvas.itemconfig(background_image, image = front_card)
+    flip_timer = window.after(3000, func = generate_english_word)
+    french_words_in_list.remove(current_card["French"])
+    print(len(french_words_in_list))
+    words_to_learn = pandas.DataFrame(french_words_in_list)
+    words_to_learn.to_csv("words_to_learn.csv")
+
+
+
+
+
+
+
+
+
+# images for right or wrong.
+cross_image = PhotoImage(file = "wrong.png")
+unknown_button = Button(image = cross_image, highlightthickness = 0, command = generate_french_word)
+unknown_button.grid(row = 2, column =0)
+
+
+check_image = PhotoImage(file = "right.png")
+# if user presses the known_button then it should remove it from the csv file
+
+known_button = Button(image = check_image, highlightthickness = 0, command = generate_french_word_1)
+known_button.grid(row = 2, column =1)
+
+
+window.mainloop()
